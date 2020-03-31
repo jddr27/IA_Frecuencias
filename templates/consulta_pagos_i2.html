@@ -1,0 +1,50 @@
+{% extends 'layout.html' %}
+
+{% block body %}
+<script>
+ $(document).ready(function() { 
+    $("#consulta").click( function(){
+      alert("ejecuta");
+      $.ajax({
+      url: '/consultaPagos',
+      type: 'POST',
+      data:  { fechainicio : $("#fechaInicio").val() , fechaFin : $("#fechaFinal").val() },
+      success : function(response){
+        var res = JSON.parse(response)
+        var table = "" ; 
+        res.forEach(element => {
+           table += `<tr><td>${element.nombre}</td><td>${element.monto}</td></tr>`
+        });
+        $("#tablaCuerpo").html(table);
+      },
+      error: function(error){
+        console.log(error);
+      }
+      });
+    });
+  });
+</script>
+ <div class="form-group">
+
+   <label>
+     Fecha Inicio:
+   </label>
+  <input type="date" class="form-control" id="fechaInicio">
+  <label>
+      Fecha Final:
+    </label>
+  <input type="date" class="form-control" id="fechaFinal">
+  <button class="btn btn-primary" id="consulta"> Consultar </button>
+
+</div>
+  <h1>PAGOS INTERVALOS</h1>
+  <table class="table" table-striped>
+    <tr>
+      <th>CLIENTE NOMBRE</th>
+      <th>MONTO</th>
+    </tr>
+    <tbody id="tablaCuerpo">
+      
+    </tbody>
+  </table>
+{% endblock %}

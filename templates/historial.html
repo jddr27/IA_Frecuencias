@@ -1,0 +1,34 @@
+{% extends 'layout.html' %}
+
+{% block body %}
+<pre>
+<table>
+    <tr>
+        <th> Fecha de ejecucion </th> 
+        <th> Hora de ejecucion </th>
+        <th> Nombre del documento de datos utilizado </th>
+        <th> Criterio de finalizacion utilizado </th>
+        <th> Metodo de seleccion de padres utilizado </th>
+        <th> Numero de generaciones alcanzado </th>
+        <th> Mejor solucion encontrada </th>
+    </tr>
+
+
+{% for e in text %}
+
+    <tr>
+        <td>{{ e["fecha"] }}</td> 
+        <td>{{ e["hora"] }}</td>
+        <td>{{ e["nombre"] }}</td>
+        <td>{{ e["fin"] }}</td>
+        <td>{{ e["padres"] }}</td>
+        <td>{{ e["gens"] }}</td>
+        <td>{{ e["solucion"] }}</td>
+    </tr>
+
+{% endfor %}
+
+
+</table>
+</pre>
+{% endblock %}

@@ -1,0 +1,38 @@
+{% extends 'layout.html' %}
+
+{% block body %}
+<script>
+$(document).ready(() => {
+  $.ajax({
+      url: '/getPagos',
+      type: 'POST',
+      success : function(response){
+        var res = JSON.parse(response)
+        var table = "" ; 
+        res.forEach(element => {
+           table += `<tr><td>${element.nit}</td><td>${element.nombre}</td><td>${element.descripcion}</td><td>${element.fechaPago}</td><td>${element.monto}</td></tr>`
+        });
+        $("#tablaCuerpo").html(table);
+      },
+      error: function(error){
+        console.log(error);
+      }
+    });
+});
+</script>
+  <h1>PAGOS</h1>
+  <table class="table" table-striped>
+      <thead>
+    <tr>
+      <th>NIT</th>
+      <th>NOMBRE</th>
+      <th>DESCRIPCION</th>
+      <th>Fecha Pago</th>
+      <th>MONTO</th>
+    </tr>
+    <thead></thead>
+    <tbody id="tablaCuerpo">
+
+    </tbody>
+  </table>
+{% endblock %}

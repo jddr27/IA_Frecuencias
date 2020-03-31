@@ -1,0 +1,111 @@
+{% extends 'layout.html' %}
+
+{% block body %}
+<script>
+ $(document).ready(function() { 
+
+
+    $.ajax({
+      url: '/getClientes',
+      type: 'POST',
+      success : function(response){
+        var res = JSON.parse(response)
+        var clientes = JSON.parse(res.clientes);
+        var nit  = `<option value="0">Seleccione</option>`;
+        clientes.forEach(element => {
+          nit += `<option value="${element.id}">${element.nit} -> ${element.nombre} </option>`
+        });
+        $('#id').html(nit)
+      },
+      error: function(error){
+        console.log(error);
+      }
+    });
+
+
+    $("#consulta").click( function(){
+      $.ajax({
+      url: '/getClientesConsulta',
+      type: 'POST',
+      data:  { id : $("#id").val() },
+      success : function(response){
+        var res = JSON.parse(response)
+        var datosCliente = JSON.parse(res.datos);
+        var cobros = JSON.parse(res.cobros);
+        var pagos = JSON.parse(res.pagos);
+
+        var htmlDatos = "";
+        var table = "" ; 
+        var tablepagos = "";
+        var tablecobros = "";
+
+        cobros.forEach(element => {
+            tablecobros += `<tr><td>${element.desc}</td><td>${element.monto}</td><td>${element.fecha}</td></tr>`
+        });
+
+        pagos.forEach(element => {
+            tablepagos +=  `<tr><td>${element.fechaPago}</td><td>${element.monto}</td> <td>${element.descripcion}</td><td>${element.tipo}</td></tr>`
+        });
+
+
+        $("#tablapago").html(tablepagos);
+        $("#tablacobros").html(tablecobros);
+
+        htmlDatos = `<div><h4>Nombre <span class="badge badge-secondary">${datosCliente.nombre}</span></h4></div>`
+        htmlDatos += `<div><h4>NIT <span class="badge badge-secondary">${datosCliente.nit}</span></h4></div>`
+        htmlDatos += `<div><h4>Cobro mensual <span class="badge badge-secondary">${datosCliente.mensual}</span></h4></div>`
+        htmlDatos += `<div><h4>Direccion <span class="badge badge-secondary">${datosCliente.direccion}</span></h4></div>`
+        htmlDatos += `<div><h4>Telefono <span class="badge badge-secondary">${datosCliente.telefono}</span></h4></div>`
+        htmlDatos += `<div><h4>Email <span class="badge badge-secondary">${datosCliente.email}</span></h4></div>`
+        htmlDatos += `<div><h4>Regimen <span class="badge badge-secondary">${datosCliente.regimen}</span></h4></div>`
+        htmlDatos += `<div><h4>Saldo actual <span class="badge badge-secondary">${datosCliente.saldo}</span></h4></div>`
+        $("#datos").html(htmlDatos);
+
+      },
+      error: function(error){
+        console.log(error);
+      }
+      });
+    });
+  });
+</script>
+ <div class="form-group">
+
+
+    <div class="form-group">
+    <label for="exampleFormControlSelect1">NIT</label>
+    <select class="form-control" id="id" name="id">
+
+    </select>
+  </div>
+
+  <button class="btn btn-primary" id="consulta"> Consultar </button>
+<div id="datos">
+
+</div>
+
+</div>
+  <h1>PAGOS </h1>
+  <table class="table" table-striped>
+    <tr>
+      <th>FECHA</th>
+      <th>MONTO</th>
+      <th>DESCRIPCION</th>
+      <th>tipo</th>
+    </tr>
+    <tbody id="tablapago">
+      
+    </tbody>
+  </table>
+  <h1> COBROS  </h1>
+  <table class="table" table-striped>
+    <tr>
+      <th>DESCRIPCION</th>
+      <th>MONTO</th>
+      <th>FECHA</th>
+    </tr>
+    <tbody id="tablacobros">
+      
+    </tbody>
+  </table>
+{% endblock %}

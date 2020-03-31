@@ -1,0 +1,51 @@
+{% extends 'layout.html' %}
+
+{% block body %}
+<script >
+  $(document).ready(()=>{
+    $.ajax({
+      url: '/getClientes',
+      type: 'POST',
+      success : function(response){
+        var res = JSON.parse(response)
+        var clientes = JSON.parse(res.clientes);
+        var nit  = "";
+        clientes.forEach(element => {
+          nit += `<option value="${element.id}">${element.nit} -> ${element.nombre} </option>`
+        });
+        $('#id').html(nit)
+      },
+      error: function(error){
+        console.log(error);
+      }
+    });
+  });
+</script>
+
+  <h1>Registro de Cobros</h1>
+  <form action="nuevoCobro" method="POST">
+    <div class="form-group">
+    <label for="exampleFormControlSelect1">NIT</label>
+    <select class="form-control" id="id" name="id">
+
+    </select>
+  </div>
+
+ 
+  <div class="form-group">
+      <label>Fecha Cobro</label>
+      <input type="date" name="fecha" class="form-control" value={{request.form.username}}>
+  </div>
+  <div class="form-group">
+      <label>Monto</label>
+      <input type="text" name="monto" class="form-control" value={{request.form.username}}>
+  </div>
+  <div class="form-group">
+      <label>Descripcion</label>
+      <textarea name="descripcion" class="form-control" value={{request.form.username}}>
+      </textarea>
+    </div>
+  
+    <button type="submit" class="btn btn-primary">Submit</button>
+  </form>
+{% endblock %}
