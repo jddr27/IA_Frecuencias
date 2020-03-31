@@ -2,38 +2,48 @@
 
 {% block body %}
   <div class="jumbotron text-center">
-    <h1>Algoritmo Genetico M c 2</h1>
+    <h1>Generador de filtros</h1>
     <p class="lead">
-       201503393  Jose Daniel De Leon
-       201504303  Jorge Daniel Monterroso
+       <h6>201503393  Jose Daniel De Leon </h6>
+       <h6>201504303  Jorge Daniel Monterroso </h6>
     </p>
+
+    <hr>
+    <hr>
     
+    <h4>Ingrese los datos del filtro</h4>
+
     <div>
       <form action="entrenar" method="POST" enctype="multipart/form-data">
         <div class="form-group">
-          <label>Seleccione un archivo de notas</label>
+          <label>Frecuencia de corte: </label>
+          <input type="number" id="frec" name="frec">
+        </div>
+        <div class="form-group">
+          <label>Tipo de filtro: </label>
+          <select id="tipo" name="tipo">
+              <option value="1">Pasa bajos</option>
+              <option value="2">Pasa altos</option>
+          </select>
+        </div>
+        <button type="submit" class="btn btn-primary">Generar</button>
+      </form>
+    </div>
+
+    <hr>
+    <hr>
+
+    <h4>Probar filtro</h4>
+
+    <div>
+      <form action="probar" method="POST" enctype="multipart/form-data">
+        <div class="form-group">
+          <label>Datos a filtrar: </label>
           <input type="file" name="archivo" class="form-control" value={{request.form.archivo}}>
         </div>
-        <div class="form-group">
-          <label>Seleccione criterio de finalizacion</label>
-          <select id="fin" name="fin">
-              <option value="1">Primer fitnes en cumplir criterio</option>
-              <option value="2">Generacion Maxima</option>
-              <option value="3">Fitnes Promedio</option>
-          </select>
-   
-        </div>
-        <div class="form-group">
-          <label>Seleccion padres</label>
-          <select id="padre" name="padre">
-            <option value="1">Mejores padres</option>
-            <option value="2">Elegidos al azar</option>
-            <option value="3">Los mejores padres tienen mas posibilidad de ser elegidos</option>
-        </select>
-        </div>
-        
-        <button type="submit" class="btn btn-primary">Submit</button>
+        <button type="submit" class="btn btn-primary">Filtrar</button>
       </form>
+
     </div>
   </div>
 {% endblock %}
