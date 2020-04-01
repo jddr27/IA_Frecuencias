@@ -6,6 +6,8 @@ import os
 import pandas as pd
 import numpy as np
 import random
+from DTS.Signal import Signal
+from DTS.Filter import Filter
 #import conn
 
    
@@ -13,6 +15,8 @@ import random
 app = Flask(__name__)
 
 arreglo = []
+input1 = Signal()
+input2 = Signal()
 
 def ordenarSegundo(val):
     return val[1]
@@ -22,22 +26,58 @@ def getprimero(val):
     return val[0]
 
 
-def obtenerFitness(frec):
-    ff = 0 * frec
+def obtenerFitness(frec, tipo):
+    global input1, input2
+    individuo = [0.5999402, -0.5999402, 0, 1, -0.7265425, 0, 1, -2, 1, 1, -1.52169043, 0.6, 1, -2, 1, 1, -1.73631017, 0.82566455]
+    ff = 0
+
+    input1.generate(frec - 200, 5, sinoidal=True)
+    filtro1 = Filter(individuo) #1.47815634821363e-90
+    output1 = filtro1.filter(input1)
+
+    input2.generate(frec + 200, 5, sinoidal=True)
+    filtro2 = Filter(individuo)
+    output2 = filtro2.filter(input2)
+
+    #print("S1: ", input1.y)
+    #print("T1: ", output1.y)
+
+    sum1 = 0
+    for a in output1.y:
+        sum1 += abs(a) ** 2
+    p1 = (1/((2*len(output1.y))-1)) * sum1
+    #print("p1: ", p1)
+
+    #print("S2: ", input2.y)
+    #print("T2: ", output2.y)
+
+    sum2 = 0
+    for a in output2.y:
+        sum2 += abs(a) ** 2
+    p2 = (1/((2*len(output2.y))-1)) * sum2  
+    #print("p2: ", p2)  
+
+    if tipo == 1:
+        ff = p1 - p2
+        print("pasa bajos: ", ff)
+    else:
+        ff = p2 - p1
+        print("pasa altos: ", ff)
+
     return ff 
 
 
 def test(frec,tipo):
     generacion = 0
-    fitFinal = obtenerFitness(frec)
+    fitFinal = obtenerFitness(frec, tipo)
     p = Poblacion()
-    fin = Criterio(p, fitFinal)
+    fin = Criterio(p, fitFinal, tipo)
     while (fin == None):
-        padres = Seleccionar(p,1)
+        padres = Seleccionar(p, tipo)
         p = Emparejar(padres)
-        fin = Criterio(p, fitFinal)
+        fin = Criterio(p, fitFinal, tipo)
         generacion += 1
-        #print(generacion)
+        print(generacion)
     print("SOLUCION: ", fin)
     print("GENERACION: ", generacion)
     return (generacion,fin)
@@ -96,28 +136,63 @@ def Poblacion():
     return result 
 
 
-def Criterio(po, final):
+def Criterio(po, final, tipo):
     result = None
     fit = []
     for i in range(24):
-        pts = Evaluar(po[i])
+        pts = Evaluar(po[i], tipo)
         fit.append(pts)
-        if(pts < final):
+        if pts > 1.0e+100: #if(pts > final):
             return po[i]
     return None
           
 
-def Evaluar(p):
-    nc = 0
-    error = 0 
-    print("Evaluando:  ", p)
-    for a in arreglo:
-        nc = p[0] * a[0] +  p[1] * a[1] + p[2] * a[2]
-        error += (a[3] - nc)**2  
-    error *= 1/len(arreglo)
-    print("Resultado :" , error)
-    return error 
+def Evaluar(p, tipo):
+    global input1, input2
+    MAXIMO = 1.5e+100
+    print("Evaluando: ", p)
+    ff = 0
 
+    filtro1 = Filter(p)
+    output1 = filtro1.filter(input1)
+
+    filtro2 = Filter(p)
+    output2 = filtro2.filter(input2)
+
+    #print("Y1: ", output1.y)
+    #print("Y2: ", output2.y)
+    #print("Tam1: ", len(output1.y))
+    #print("Tam2: ", len(output2.y))
+
+    #print("Y1: ", output1.y)
+    sum1 = 0
+    for a in output1.y:
+        sum1 += abs(a) ** 2
+        #print("a: ", a)
+        #print("sum1: ", sum1)
+        if sum1 > MAXIMO:
+            break
+    p1 = (1/((2*len(output1.y))-1)) * sum1
+
+    #print("Y2: ", output2.y)
+    sum2 = 0
+    for a in output2.y:
+        sum2 += abs(a) ** 2
+        #print("a: ", a)
+        #print("sum2: ", sum2)
+        if sum2 > MAXIMO:
+            break
+    p2 = (1/((2*len(output2.y))-1)) * sum2    
+
+    if tipo == 1:
+        ff = p1 - p2
+        print("Resultado: ", ff)
+    else:
+        ff = p2 - p1
+        print("Resultado: ", ff)
+
+    return ff 
+ 
 
 def Inicializar():
     mat = []
@@ -129,11 +204,11 @@ def Inicializar():
     return mat
 
 
-def Seleccionar(p):
+def Seleccionar(p, tipo):
     #LOS MEJORES 8 PADRES
     resultado = []
     for item in p:
-        resultado.append((item,Evaluar(item)))
+        resultado.append((item,Evaluar(item, tipo)))
     resultado.sort(key= ordenarSegundo )
     resultado = resultado[:12]
     resultado = list(map(getprimero,resultado))
@@ -179,9 +254,9 @@ def Cruzar(p1,p2):
     
 
 def Mutar(hijo):
-    while:  
+    while True:  
         pos = random.randrange(0,18)
-        if pos != 3 or pos != 9 or pos != 15:
+        if pos != 3 and pos != 9 and pos != 15:
             hijo[pos] += random.uniform(-0.5,0.5) 
             break
     return hijo
