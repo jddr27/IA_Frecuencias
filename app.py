@@ -16,30 +16,50 @@ arreglo = []
 
 def ordenarSegundo(val):
     return val[1]
+
+
 def getprimero(val):
     return val[0]
 
 
-def test(padres,crit):
+def obtenerFitness(frec):
+    ff = 0 * frec
+    return ff 
+
+
+def test(frec,tipo):
     generacion = 0
+    fitFinal = obtenerFitness(frec)
     p = Poblacion()
-    fin = Criterio(p,crit,generacion)
+    fin = Criterio(p, fitFinal)
     while (fin == None):
         padres = Seleccionar(p,1)
         p = Emparejar(padres)
-        fin = Criterio(p,crit,generacion)
+        fin = Criterio(p, fitFinal)
         generacion += 1
         #print(generacion)
     print("SOLUCION: ", fin)
     print("GENERACION: ", generacion)
     return (generacion,fin)
 
+
 @app.route("/home")
 def clientes():
     return render_template("index.html")
 
+
 @app.route("/entrenar",methods=['POST'])
 def entrenar():
+    frec = int(request.form['frec'])
+    tipo = int(request.form['tipo'])
+    
+    sol = test(frec,tipo)
+
+    return  redirect(url_for('clientes'))
+
+
+@app.route("/probar",methods=['POST'])
+def probar():
     global arreglo
     padres = int(request.form['padre'])
     criterio = int(request.form['fin'])
@@ -68,44 +88,24 @@ def entrenar():
     return  redirect(url_for('mostrar'))
 
 
-
 def Poblacion():
     result = []
-    for i in range(16):
+    for i in range(24):
         result.append(Inicializar())
     #print(result)    
     return result 
 
-def Criterio(po,i,generacion):
+
+def Criterio(po, final):
     result = None
     fit = []
-    fitnesFinal = 15
-    generacionFinal = 100
-    fitnesPromedio = 35
-    #Primer fitnes en cumplir criterio
-    if i == 1:
-        for i in range(16):
-            pts = Evaluar(po[i])
-            fit.append(pts)
-            if(pts < fitnesFinal):
-                return po[i]
-    # GENEACION MAXIMA
-    if i==2:
-        if generacion >= generacionFinal:
-            return po[0]
-    # Fitnes Promedio
-    promedio = 0
-    if i==3:
-        for i in range(16):
-            pts = Evaluar(po[i])
-            promedio += pts
-        promedio /= len(po)    
-        print("PROMEDIO :" , promedio)
-        if promedio < fitnesPromedio:
-            return po[0]
+    for i in range(24):
+        pts = Evaluar(po[i])
+        fit.append(pts)
+        if(pts < final):
+            return po[i]
     return None
-
-            
+          
 
 def Evaluar(p):
     nc = 0
@@ -118,56 +118,41 @@ def Evaluar(p):
     print("Resultado :" , error)
     return error 
 
+
 def Inicializar():
     mat = []
-    for i in range(8):
-        mat.append(random.uniform(-1,1))
+    for i in range(18):
+        if i == 3 or i == 9 or i == 15:
+            mat.append(1)
+        else:
+            mat.append(random.uniform(-3,3))
     return mat
 
 
-def Seleccionar(p,i):
+def Seleccionar(p):
     #LOS MEJORES 8 PADRES
     resultado = []
-    if(i == 1):
-        for item in p:
-            resultado.append((item,Evaluar(item)))
-        resultado.sort(key= ordenarSegundo )
-        resultado = resultado[:8]
-        resultado = list(map(getprimero,resultado))
-        return resultado
-    #OCho elegidos al azar
-    if(i == 2):
-        lista = []
-        while len(lista) < 8:
-            numrandom = random.randint(0,16)
-            if numrandom not in lista:
-                lista.append(numrandom)
-                resultado.append(p[numrandom])
-        return resultado
-    #Los mejores padres tienen mas probabilidad de ser elegidos 70% mejores 80% peores
-    if(i == 3):
-        for item in p:
-            resultado.append((item,Evaluar(item)))
-        resultado.sort(key= ordenarSegundo )
-        mejores = resultado[:8]
-        mejores = list(map(getprimero,resultado))
-        peores = resultado[8:]
-        peores = list(map(getprimero,resultado))
-        # hijo[0] = p1[0] if random.uniform(0,1)>0.5 else p2[0]
-        for i in range(8):
-            resultado[i] = mejores[i] if random.uniform(0,1)>0.70 else peores[i]
-        return resultado    
-    return None
+    for item in p:
+        resultado.append((item,Evaluar(item)))
+    resultado.sort(key= ordenarSegundo )
+    resultado = resultado[:12]
+    resultado = list(map(getprimero,resultado))
+    return resultado
+
 
 def Emparejar(po):
-    h1 = Cruzar(po[0],po[7])
-    h2 = Cruzar(po[1],po[6])
-    h3 = Cruzar(po[2],po[5])
-    h4 = Cruzar(po[3],po[4])
-    h5 = Cruzar(po[0],po[1])
-    h6 = Cruzar(po[2],po[3])
-    h7 = Cruzar(po[4],po[5])
-    h8 = Cruzar(po[6],po[7])
+    h1 = Cruzar(po[0],po[11])
+    h2 = Cruzar(po[1],po[10])
+    h3 = Cruzar(po[2],po[9])
+    h4 = Cruzar(po[3],po[8])
+    h5 = Cruzar(po[4],po[7])
+    h6 = Cruzar(po[5],po[6])
+    h7 = Cruzar(po[0],po[1])
+    h8 = Cruzar(po[2],po[3])
+    h9 = Cruzar(po[4],po[5])
+    h10 = Cruzar(po[6],po[7])
+    h11 = Cruzar(po[8],po[9])
+    h12 = Cruzar(po[10],po[11])
     po.append(Mutar(h1))
     po.append(Mutar(h2))
     po.append(Mutar(h3))
@@ -176,20 +161,31 @@ def Emparejar(po):
     po.append(Mutar(h6))
     po.append(Mutar(h7))
     po.append(Mutar(h8))
+    po.append(Mutar(h9))
+    po.append(Mutar(h10))
+    po.append(Mutar(h11))
+    po.append(Mutar(h12))
     return po
 
+
 def Cruzar(p1,p2):
-    hijo = [-1,-1,-1]
-    hijo[0] = p1[0] if random.uniform(0,1)>0.5 else p2[0]
-    hijo[1] = p1[1] if random.uniform(0,1)>0.5 else p2[1]
-    hijo[2] = p1[2] if random.uniform(0,1)>0.5 else p2[2]
+    hijo = []
+    for i in range(18):
+        if random.uniform(0,1)>0.5:
+            hijo.append(p1[i])
+        else:
+            hijo.append(p2[i])
     return hijo
     
 
 def Mutar(hijo):
-    pos = random.randrange(0,3)
-    hijo[pos] += random.uniform(-0.3,0.3) 
+    while:  
+        pos = random.randrange(0,18)
+        if pos != 3 or pos != 9 or pos != 15:
+            hijo[pos] += random.uniform(-0.5,0.5) 
+            break
     return hijo
+
 
 @app.route("/log")
 def mostrar():
@@ -198,23 +194,7 @@ def mostrar():
     text.close()
     y = json.loads(content)
     return render_template('historial.html', text=y)
-
-#@app.route("/ingresoCliente",methods=['POST'])
-#def ingresoclientes(): 
-#    nit = request.form['nit']
-#    usuario = request.form['username']
-#    monto = request.form['monto']
-#    direccion = request.form['direccion']
-#    telefono = request.form['telefono']
-#    email = request.form['email']
-#    regimen = request.form['regimen']
-#    saldo = request.form['saldo']
-#    sql = "INSERT INTO cliente (NIT,NOMBRE,MENSUAL,DIRECCION,TELEFONO,EMAIL,REGIMEN,SALDO) VALUES(%i,'%s',%f,'%s','%s','%s','%s',%f)" % (int(nit),usuario,float(monto),direccion,telefono,email,regimen,float(saldo))
-#    run_query(sql)
-#    return  redirect(url_for('clientes'))
   
 
 if __name__ == "__main__":
     app.run(debug=True)
-
-
