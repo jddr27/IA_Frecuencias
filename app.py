@@ -8,13 +8,14 @@ import numpy as np
 import random
 from DTS.Signal import Signal
 from DTS.Filter import Filter
+import matplotlib.pyplot as chart
 #import conn
 
    
 
 app = Flask(__name__)
 
-arreglo = []
+arreglo = ["c0","c1","c2","c3","c4","c5","c6","c7","c8","c9","c10","c11","c12","c13","c14","c15","c16","c17"]
 input1 = Signal()
 input2 = Signal()
 
@@ -31,11 +32,11 @@ def obtenerFitness(frec, tipo):
     individuo = [0.5999402, -0.5999402, 0, 1, -0.7265425, 0, 1, -2, 1, 1, -1.52169043, 0.6, 1, -2, 1, 1, -1.73631017, 0.82566455]
     ff = 0
 
-    input1.generate(frec - 200, 5, sinoidal=True)
+    input1.generate(frec - 200, 1.47815634821363e-90, sinoidal=True)
     filtro1 = Filter(individuo) #1.47815634821363e-90
     output1 = filtro1.filter(input1)
 
-    input2.generate(frec + 200, 5, sinoidal=True)
+    input2.generate(frec + 200, 1.47815634821363e-90, sinoidal=True)
     filtro2 = Filter(individuo)
     output2 = filtro2.filter(input2)
 
@@ -68,24 +69,27 @@ def obtenerFitness(frec, tipo):
 
 
 def test(frec,tipo):
+    global arreglo
     generacion = 0
     fitFinal = obtenerFitness(frec, tipo)
     p = Poblacion()
-    fin = Criterio(p, fitFinal, tipo)
+    fin = Criterio(p, fitFinal, tipo, 0)
     while (fin == None):
         padres = Seleccionar(p, tipo)
         p = Emparejar(padres)
-        fin = Criterio(p, fitFinal, tipo)
+        fin = Criterio(p, fitFinal, tipo, generacion)
         generacion += 1
         print(generacion)
     print("SOLUCION: ", fin)
     print("GENERACION: ", generacion)
-    return (generacion,fin)
+    arreglo = fin
+    return generacion
 
 
 @app.route("/home")
 def clientes():
-    return render_template("index.html")
+    global arreglo
+    return render_template("index.html",sol=arreglo)
 
 
 @app.route("/entrenar",methods=['POST'])
@@ -101,30 +105,26 @@ def entrenar():
 @app.route("/probar",methods=['POST'])
 def probar():
     global arreglo
-    padres = int(request.form['padre'])
-    criterio = int(request.form['fin'])
     f = request.files['archivo']
     f.save(os.path.join("./archivo", "archivo.csv"))
     data = pd.read_csv(os.path.join("./archivo","archivo.csv"))
-    arreglo = data.to_numpy()
+    entrada = data.to_numpy()
     
-    dateTimeObj = datetime.now()
-    fecha = dateTimeObj.strftime("%d %b %Y")
-    hora = dateTimeObj.strftime("%H:%M:%S")
-    nombre = f.filename
-    sol = test(padres,criterio)
-    estructura = {
-        "fecha": fecha,
-        "hora": hora,
-        "nombre" : nombre,
-        "fin" : criterio,
-        "padres" : padres,
-        "gens" : sol[0],
-        "solucion" : sol[1] }
-    
-    text = open(os.path.join("./archivo","log.txt"), 'a')
-    text.write(",\n"+json.dumps(estructura))
-    text.close()
+
+    filtro = Filter(arreglo)
+    output = filtro.filter(entrada)
+
+    # Generacion de grafica
+    fig, (ax1, ax2) = chart.subplots(2, 1, sharex=True)
+    ax1.plot(input.t, input.y)
+    ax1.set_title('Entrada del filtro')
+    ax1.axis([0, 1, -10, 10])
+    ax2.plot(output.t, output.y)
+    ax2.set_title('Salida del filtro')
+    ax2.axis([0, 1, -10, 10])
+    ax2.set_xlabel('Tiempo [segundos]')
+    chart.tight_layout()
+    chart.show()
     return  redirect(url_for('mostrar'))
 
 
@@ -136,13 +136,13 @@ def Poblacion():
     return result 
 
 
-def Criterio(po, final, tipo):
+def Criterio(po, final, tipo, gen):
     result = None
     fit = []
     for i in range(24):
         pts = Evaluar(po[i], tipo)
         fit.append(pts)
-        if pts > 1.0e+100: #if(pts > final):
+        if(pts > final) and (gen > 10):
             return po[i]
     return None
           
@@ -264,11 +264,7 @@ def Mutar(hijo):
 
 @app.route("/log")
 def mostrar():
-    text = open(os.path.join("./archivo","log.txt"), 'r')
-    content = "[" + text.read() + "]"
-    text.close()
-    y = json.loads(content)
-    return render_template('historial.html', text=y)
+    return render_template('historial.html', text="Archivo generado")
   
 
 if __name__ == "__main__":
