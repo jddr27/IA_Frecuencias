@@ -13,3 +13,8 @@ class Filter:
         output = Signal()
         output.y = sig.sosfilt(self.values, input.y)
         return output
+
+    def filterdatos(self, input):
+        output = Signal()
+        output.y = sig.sosfilt(self.values, input)
+        return output
