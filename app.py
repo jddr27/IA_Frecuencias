@@ -109,14 +109,19 @@ def probar():
     f.save(os.path.join("./archivo", "archivo.csv"))
     data = pd.read_csv(os.path.join("./archivo","archivo.csv"))
     entrada = data.to_numpy()
-    
-
+ 
+    #Asignacion de datos
+    datos = [dato[0] for dato in entrada]
     filtro = Filter(arreglo)
-    output = filtro.filter(entrada)
+    output = filtro.filterdatos(datos)
+    print("imprimiendo y")
+    for d in output.y:
+        print(d)
+
 
     # Generacion de grafica
     fig, (ax1, ax2) = chart.subplots(2, 1, sharex=True)
-    ax1.plot(input.t, input.y)
+    ax1.plot(input1.t, input1.y)
     ax1.set_title('Entrada del filtro')
     ax1.axis([0, 1, -10, 10])
     ax2.plot(output.t, output.y)
