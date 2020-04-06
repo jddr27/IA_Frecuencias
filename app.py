@@ -116,9 +116,9 @@ def probar():
     input = Signal()
     input.t = np.linspace(0, 1, len(datos), False)
     input.y = datos
-    print("tam input.t",len(input.t)) 
+    print("tam input.t: ",len(input.t)) 
     print("input.t:", input.t)
-    print("tam input.y",len(input.y))
+    print("tam input.y: ",len(input.y))
     print("input.y: ", input.y)
 
     output = Signal()
@@ -127,9 +127,9 @@ def probar():
     filtro = Filter(arreglo)
 
     output = filtro.filterdatos(output)
-    print("tam output.t",len(output.t)) 
+    print("tam output.t: ",len(output.t)) 
     print("output.t:", output.t)
-    print("tam output.y",len(output.y))
+    print("tam output.y: ",len(output.y))
     print("output.y: ", output.y)
 
 
