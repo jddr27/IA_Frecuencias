@@ -16,5 +16,8 @@ class Filter:
 
     def filterdatos(self, input):
         output = Signal()
-        output.y = sig.sosfilt(self.values, input)
+        print("filtro input.t",len(input.t)) 
+        output.t = input.t
+        print("filtro output.t",len(input.t)) 
+        output.y = sig.sosfilt(self.values, input.y)
         return output

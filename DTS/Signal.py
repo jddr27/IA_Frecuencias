@@ -1,6 +1,6 @@
 import numpy as np
 
-SAMPLE_FRECUENCY = 2500#10000
+SAMPLE_FRECUENCY = 10000
 
 class Signal:
     y = []

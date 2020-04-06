@@ -112,16 +112,26 @@ def probar():
  
     #Asignacion de datos
     datos = [dato[0] for dato in entrada]
+
+    input = Signal()
+    input.t = np.linspace(0, 1, len(arreglo), False)
+    input.y = arreglo
+    print("tam input.t",len(input.t)) 
+    print("input.t:", input.t)
+    print("tam input.y",len(input.y))
+    print("input.y: ", input.y)
+
     filtro = Filter(arreglo)
-    output = filtro.filterdatos(datos)
-    print("imprimiendo y")
-    for d in output.y:
-        print(d)
+    output = filtro.filterdatos(input)
+    print("tam output.t",len(output.t)) 
+    print("output.t:", output.t)
+    print("tam output.y",len(output.y))
+    print("output.y: ", output.y)
 
 
     # Generacion de grafica
     fig, (ax1, ax2) = chart.subplots(2, 1, sharex=True)
-    ax1.plot(input1.t, input1.y)
+    ax1.plot(input.t, input.y)
     ax1.set_title('Entrada del filtro')
     ax1.axis([0, 1, -10, 10])
     ax2.plot(output.t, output.y)
